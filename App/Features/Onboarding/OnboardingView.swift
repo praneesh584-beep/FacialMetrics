@@ -6,21 +6,21 @@ struct OnboardingView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 22) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(AppConfiguration.displayName)
-                            .font(.largeTitle.weight(.semibold))
+                            .font(.title.weight(.semibold))
                             .accessibilityAddTraits(.isHeader)
                         Text(AppBranding.shortPrivacySummary)
-                            .font(.title3)
+                            .font(.body)
                             .foregroundStyle(.secondary)
                     }
 
-                    VStack(alignment: .leading, spacing: 16) {
-                        PrivacyRow(symbol: "lock.shield", title: "On-device processing", detail: "The MVP keeps scan samples local and does not upload scans automatically.")
-                        PrivacyRow(symbol: "camera.viewfinder", title: "Camera consent", detail: "The front TrueDepth camera is used only after camera permission is granted.")
-                        PrivacyRow(symbol: "square.and.arrow.up", title: "User-initiated export", detail: "Diagnostics and scan summaries are shared only when you choose to export them.")
-                        PrivacyRow(symbol: "exclamationmark.triangle", title: "Experimental measurements", detail: "Results are geometry experiments, not medical advice or a scientific attractiveness rating.")
+                    VStack(spacing: 10) {
+                        PrivacyRow(symbol: "lock.shield", title: "Local scans", detail: "Scan samples stay on this device.")
+                        PrivacyRow(symbol: "camera.viewfinder", title: "Camera consent", detail: "The TrueDepth camera starts only after permission.")
+                        PrivacyRow(symbol: "square.and.arrow.up", title: "Exports", detail: "Diagnostics are shared only when you choose.")
+                        PrivacyRow(symbol: "exclamationmark.triangle", title: "Experimental", detail: "Results are not medical advice or a validated rating.")
                     }
 
                     Button(action: onComplete) {
@@ -31,9 +31,11 @@ struct OnboardingView: View {
                     .controlSize(.large)
                     .accessibilityHint("Opens the FaceMetric scanner and settings tabs.")
                 }
-                .padding()
+                .padding(.horizontal, 20)
+                .padding(.vertical, 24)
             }
             .navigationTitle("Welcome")
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 }
@@ -46,9 +48,9 @@ private struct PrivacyRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: symbol)
-                .font(.title3)
+                .font(.body.weight(.semibold))
                 .foregroundStyle(.tint)
-                .frame(width: 28)
+                .frame(width: 24)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
@@ -58,5 +60,8 @@ private struct PrivacyRow: View {
                     .foregroundStyle(.secondary)
             }
         }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
     }
 }
