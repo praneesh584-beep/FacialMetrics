@@ -1,0 +1,78 @@
+name: iOS Validate
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Generate, Build, And Test
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Print toolchain versions
+        run: |
+          xcodebuild -version
+          swift --version
+          xcodegen --version
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: List project
+        run: xcodebuild -list -project FaceMetric.xcodeproj
+
+      - name: Select simulator
+        id: simulator
+        run: |
+          set -euo pipefail
+          SIMULATOR_NAME="$(xcrun simctl list devices available | awk -F '[()]' '/iPhone/ && /Shutdown|Booted/ { gsub(/^[ \t]+|[ \t]+$/, "", $1); print $1; exit }')"
+          if [ -z "${SIMULATOR_NAME}" ]; then
+            echo "No available iPhone simulator found." >&2
+            exit 1
+          fi
+          echo "name=${SIMULATOR_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Build for simulator
+        run: |
+          xcodebuild \
+            -project FaceMetric.xcodeproj \
+            -scheme FaceMetric \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,name=${{ steps.simulator.outputs.name }}" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Run unit tests
+        run: |
+          xcodebuild \
+            -project FaceMetric.xcodeproj \
+            -scheme FaceMetric \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,name=${{ steps.simulator.outputs.name }}" \
+            -resultBundlePath build/TestResults.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            test
+
+      - name: Upload test results on failure
+        if: failure() && hashFiles('build/TestResults.xcresult/**') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: facemetric-test-results
+          path: build/TestResults.xcresult
+          retention-days: 7

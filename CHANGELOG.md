@@ -1,0 +1,6 @@
+# Changelog
+
+## Unreleased
+
+- Added Phase 0 repository foundation, XcodeGen config, CI workflows, unsigned IPA packaging script, and documentation.
+- Added Phase 1 SwiftUI app shell with mock scanner flow, diagnostics, local storage, experimental results, and unit tests.

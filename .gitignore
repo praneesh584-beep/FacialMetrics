@@ -1,0 +1,17 @@
+.DS_Store
+*.xcuserstate
+*.xcworkspace
+*.xcodeproj
+DerivedData/
+build/
+Payload/
+*.ipa
+*.dSYM
+*.xcresult
+*.log
+*.tmp
+*.swp
+.swiftpm/
+.build/
+UserScans/
+DiagnosticsExports/

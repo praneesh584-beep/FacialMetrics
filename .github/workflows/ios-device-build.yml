@@ -1,0 +1,37 @@
+name: Build Unsigned iPhone IPA
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-device-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-unsigned-ipa:
+    name: Build Unsigned Device IPA
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Build unsigned IPA
+        run: bash ./scripts/build_unsigned_ipa.sh
+
+      - name: Upload unsigned IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FaceMetric-unsigned-ipa
+          path: |
+            build/artifacts/FaceMetric-unsigned.ipa
+            build/artifacts/FaceMetric-unsigned.ipa.sha256
+            build/artifacts/build-info.txt
+          retention-days: 7
