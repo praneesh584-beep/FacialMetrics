@@ -6,13 +6,15 @@ SCHEME_NAME="FaceMetric"
 CONFIGURATION="Debug"
 DERIVED_DATA_PATH="build/DerivedData"
 ARTIFACT_DIR="build/artifacts"
+LOG_DIR="build/logs"
 PAYLOAD_DIR="build/Payload"
 IPA_PATH="${ARTIFACT_DIR}/FaceMetric-unsigned.ipa"
 
-mkdir -p "${ARTIFACT_DIR}"
+mkdir -p "${ARTIFACT_DIR}" "${LOG_DIR}"
 
 xcodegen generate
 
+set +e
 xcodebuild \
   -project "${PROJECT_NAME}.xcodeproj" \
   -scheme "${SCHEME_NAME}" \
@@ -23,7 +25,23 @@ xcodebuild \
   CODE_SIGNING_ALLOWED=NO \
   CODE_SIGNING_REQUIRED=NO \
   CODE_SIGN_IDENTITY="" \
-  build
+  build > "${LOG_DIR}/device-build.log" 2>&1
+status=$?
+set -e
+
+if [ "${status}" -ne 0 ]; then
+  ERROR_REPORT="${LOG_DIR}/device-build-errors.txt"
+  {
+    echo "xcodebuild device build failed with status ${status}"
+    echo
+    echo "Compiler errors:"
+    grep -n -i -E "error:|fatal error:" "${LOG_DIR}/device-build.log" || true
+    echo
+    echo "Last 180 device-build-log lines:"
+    tail -n 180 "${LOG_DIR}/device-build.log"
+  } | tee "${ERROR_REPORT}"
+  exit "${status}"
+fi
 
 APP_PATH="$(find "${DERIVED_DATA_PATH}/Build/Products/${CONFIGURATION}-iphoneos" -maxdepth 2 -type d -name "${PROJECT_NAME}.app" -print -quit)"
 
