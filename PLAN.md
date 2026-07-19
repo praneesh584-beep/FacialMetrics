@@ -38,7 +38,8 @@ Status: next.
 - Push to GitHub.
 - Run `iOS Validate`.
 - Fix XcodeGen, Swift, XCTest, availability, and warning issues found by macOS.
-- Record actual Xcode and Swift versions in this file after the first successful CI run.
+- Current CI runner reports Xcode 16.4 and Apple Swift 6.1.2.
+- `project.yml` uses Swift 5 language mode (`SWIFT_VERSION: 5.0`) for the MVP, compiled by the current stable Xcode runner.
 
 ## Phase 3: First Unsigned IPA
 
