@@ -61,11 +61,24 @@ jobs:
             build > build/logs/simulator-build.log 2>&1
           status=$?
           if [ "$status" -ne 0 ]; then
+            ERROR_REPORT="build/logs/compiler-errors.txt"
             echo "xcodebuild failed with status $status"
-            echo "Compiler errors:"
-            grep -n -i -E "error:|fatal error:" build/logs/simulator-build.log || true
-            echo "Last 120 build-log lines:"
-            tail -n 120 build/logs/simulator-build.log
+            {
+              echo "xcodebuild failed with status $status"
+              echo
+              echo "Compiler errors:"
+              grep -n -i -E "error:|fatal error:" build/logs/simulator-build.log || true
+              echo
+              echo "Last 160 build-log lines:"
+              tail -n 160 build/logs/simulator-build.log
+            } | tee "$ERROR_REPORT"
+            {
+              echo "## Simulator Build Failed"
+              echo
+              echo '```text'
+              cat "$ERROR_REPORT"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
             exit "$status"
           fi
 
@@ -83,11 +96,24 @@ jobs:
             test > build/logs/unit-tests.log 2>&1
           status=$?
           if [ "$status" -ne 0 ]; then
+            ERROR_REPORT="build/logs/compiler-errors.txt"
             echo "xcodebuild test failed with status $status"
-            echo "Compiler or test errors:"
-            grep -n -i -E "error:|fatal error:|failed" build/logs/unit-tests.log || true
-            echo "Last 120 test-log lines:"
-            tail -n 120 build/logs/unit-tests.log
+            {
+              echo "xcodebuild test failed with status $status"
+              echo
+              echo "Compiler or test errors:"
+              grep -n -i -E "error:|fatal error:|failed" build/logs/unit-tests.log || true
+              echo
+              echo "Last 160 test-log lines:"
+              tail -n 160 build/logs/unit-tests.log
+            } | tee "$ERROR_REPORT"
+            {
+              echo "## Unit Tests Failed"
+              echo
+              echo '```text'
+              cat "$ERROR_REPORT"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
             exit "$status"
           fi
 
@@ -102,6 +128,14 @@ jobs:
         with:
           name: facemetric-build-logs
           path: build/logs
+          retention-days: 7
+
+      - name: Upload compiler errors on failure
+        if: always() && failure() && hashFiles('build/logs/compiler-errors.txt') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: DOWNLOAD-ME-compiler-errors
+          path: build/logs/compiler-errors.txt
           retention-days: 7
 
       - name: Upload test results on failure
