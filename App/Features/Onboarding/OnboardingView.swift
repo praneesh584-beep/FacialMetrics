@@ -17,10 +17,10 @@ struct OnboardingView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 16) {
-                        PrivacyRow(symbol: "lock.shield", title: "On-device processing", body: "The MVP keeps scan samples local and does not upload scans automatically.")
-                        PrivacyRow(symbol: "camera.viewfinder", title: "Camera consent", body: "The front TrueDepth camera is used only after camera permission is granted.")
-                        PrivacyRow(symbol: "square.and.arrow.up", title: "User-initiated export", body: "Diagnostics and scan summaries are shared only when you choose to export them.")
-                        PrivacyRow(symbol: "exclamationmark.triangle", title: "Experimental measurements", body: "Results are geometry experiments, not medical advice or a scientific attractiveness rating.")
+                        PrivacyRow(symbol: "lock.shield", title: "On-device processing", detail: "The MVP keeps scan samples local and does not upload scans automatically.")
+                        PrivacyRow(symbol: "camera.viewfinder", title: "Camera consent", detail: "The front TrueDepth camera is used only after camera permission is granted.")
+                        PrivacyRow(symbol: "square.and.arrow.up", title: "User-initiated export", detail: "Diagnostics and scan summaries are shared only when you choose to export them.")
+                        PrivacyRow(symbol: "exclamationmark.triangle", title: "Experimental measurements", detail: "Results are geometry experiments, not medical advice or a scientific attractiveness rating.")
                     }
 
                     Button(action: onComplete) {
@@ -41,7 +41,7 @@ struct OnboardingView: View {
 private struct PrivacyRow: View {
     let symbol: String
     let title: String
-    let body: String
+    let detail: String
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -53,7 +53,7 @@ private struct PrivacyRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.headline)
-                Text(body)
+                Text(detail)
                     .font(.body)
                     .foregroundStyle(.secondary)
             }
