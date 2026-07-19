@@ -24,6 +24,7 @@ targets:
         PRODUCT_NAME: FaceMetric
         INFOPLIST_FILE: App/Resources/Info.plist
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: NO
         CODE_SIGNING_ALLOWED: NO
   FaceMetricTests:
     type: bundle.unit-test
