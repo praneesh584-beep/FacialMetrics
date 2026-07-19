@@ -60,7 +60,7 @@ final class ScanStore {
         if let rootDirectory {
             return rootDirectory.appendingPathComponent(folderName, isDirectory: true)
         }
-        try fileManager.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+        return try fileManager.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             .appendingPathComponent(AppConfiguration.displayName, isDirectory: true)
             .appendingPathComponent(folderName, isDirectory: true)
     }
