@@ -7,11 +7,13 @@ struct ResultsView: View {
     var body: some View {
         List {
             if let previewSample {
-                Section("3D Mesh") {
+                Section {
                     FaceMeshPreview(sample: previewSample)
                         .frame(height: 280)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                         .listRowInsets(EdgeInsets())
+                } header: {
+                    Text("3D Mesh")
                 } footer: {
                     Text("This is the captured ARKit face mesh, rendered locally on device.")
                 }
