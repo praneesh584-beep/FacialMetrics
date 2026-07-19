@@ -1,3 +1,4 @@
+#if !targetEnvironment(simulator)
 import ARKit
 import AVFoundation
 import Foundation
@@ -151,3 +152,4 @@ enum PoseMath {
         AngleMath.normalizedRadians(Double(atan2(transform.columns.1.x, transform.columns.1.y)))
     }
 }
+#endif

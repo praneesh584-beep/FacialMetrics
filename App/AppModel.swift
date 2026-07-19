@@ -42,7 +42,7 @@ final class AppModel: ObservableObject {
         let measurement = MeasurementEngine()
         let scoring = MockScoringEngine()
 
-        #if targetEnvironment(simulator)
+        #if targetEnvironment(simulator) || FACEMETRIC_MOCK_CAPTURE
         let provider: FaceCaptureProvider = MockFaceCaptureProvider(scenario: .successfulGuidedScan, diagnostics: diagnostics)
         #else
         let provider: FaceCaptureProvider = ARKitFaceCaptureProvider(diagnostics: diagnostics)

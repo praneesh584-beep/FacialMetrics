@@ -1,3 +1,4 @@
+#if !targetEnvironment(simulator)
 import Foundation
 
 final class AVFoundationRawDepthCaptureProvider {
@@ -5,3 +6,4 @@ final class AVFoundationRawDepthCaptureProvider {
 
     private init() {}
 }
+#endif

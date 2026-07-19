@@ -50,20 +50,29 @@ jobs:
 
       - name: Build for simulator
         run: |
-          set -o pipefail
           mkdir -p build/logs
+          set +e
           xcodebuild \
             -project FaceMetric.xcodeproj \
             -scheme FaceMetric \
             -configuration Debug \
             -destination "platform=iOS Simulator,name=${{ steps.simulator.outputs.name }}" \
             CODE_SIGNING_ALLOWED=NO \
-            build 2>&1 | tee build/logs/simulator-build.log
+            build > build/logs/simulator-build.log 2>&1
+          status=$?
+          if [ "$status" -ne 0 ]; then
+            echo "xcodebuild failed with status $status"
+            echo "Compiler errors:"
+            grep -n -i -E "error:|fatal error:" build/logs/simulator-build.log || true
+            echo "Last 120 build-log lines:"
+            tail -n 120 build/logs/simulator-build.log
+            exit "$status"
+          fi
 
       - name: Run unit tests
         run: |
-          set -o pipefail
           mkdir -p build/logs
+          set +e
           xcodebuild \
             -project FaceMetric.xcodeproj \
             -scheme FaceMetric \
@@ -71,7 +80,16 @@ jobs:
             -destination "platform=iOS Simulator,name=${{ steps.simulator.outputs.name }}" \
             -resultBundlePath build/TestResults.xcresult \
             CODE_SIGNING_ALLOWED=NO \
-            test 2>&1 | tee build/logs/unit-tests.log
+            test > build/logs/unit-tests.log 2>&1
+          status=$?
+          if [ "$status" -ne 0 ]; then
+            echo "xcodebuild test failed with status $status"
+            echo "Compiler or test errors:"
+            grep -n -i -E "error:|fatal error:|failed" build/logs/unit-tests.log || true
+            echo "Last 120 test-log lines:"
+            tail -n 120 build/logs/unit-tests.log
+            exit "$status"
+          fi
 
       - name: Print compiler errors
         if: always() && hashFiles('build/logs/*.log') != ''
