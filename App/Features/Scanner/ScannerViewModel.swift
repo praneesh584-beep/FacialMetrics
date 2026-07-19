@@ -8,6 +8,8 @@ final class ScannerViewModel: ObservableObject {
     @Published private(set) var lastQuality: ScanQualityResult?
     @Published private(set) var report: AnalysisReport?
     @Published private(set) var isRunning = false
+    @Published private(set) var isAutoScanning = false
+    @Published private(set) var latestSample: FaceFrameSample?
     @Published private(set) var acceptedFrameCount = 0
     @Published private(set) var rejectedFrameCount = 0
 
@@ -41,6 +43,7 @@ final class ScannerViewModel: ObservableObject {
         report = nil
         machine = ScannerStateMachine()
         previousSample = nil
+        latestSample = nil
         acceptedFrameCount = 0
         rejectedFrameCount = 0
 
@@ -87,6 +90,7 @@ final class ScannerViewModel: ObservableObject {
             let sample = try await captureProvider.captureStableSample()
             let quality = qualityEvaluator.evaluate(sample: sample, previousSample: previousSample, stage: machine.stage)
             previousSample = sample
+            latestSample = sample
             lastQuality = quality
             acceptedFrameCount += quality.acceptedFrameCount
             rejectedFrameCount += quality.rejectedFrameCount
@@ -104,18 +108,28 @@ final class ScannerViewModel: ObservableObject {
         }
     }
 
-    func runMockFlow() async {
+    func runGuidedScan() async {
+        guard !isAutoScanning else { return }
+        isAutoScanning = true
+        defer { isAutoScanning = false }
+
         if !isRunning {
             await begin()
         }
-        for _ in 0..<20 where stage != .results && stage != .failed {
+
+        for _ in 0..<40 {
+            if Task.isCancelled || !isRunning || stage == .results || stage == .failed || stage == .permissionDenied || stage == .unsupportedDevice {
+                break
+            }
             await captureNextSample()
+            try? await Task.sleep(nanoseconds: 220_000_000)
         }
     }
 
     func stop() {
         captureProvider.stop()
         isRunning = false
+        isAutoScanning = false
     }
 
     private func finishAnalysis(quality: ScanQualityResult) async {

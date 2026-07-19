@@ -21,15 +21,10 @@ struct MainTabView: View {
     @EnvironmentObject private var appModel: AppModel
 
     var body: some View {
-        TabView {
-            ScannerView(viewModel: appModel.scannerViewModel)
-                .tabItem { Label("Scan", systemImage: "viewfinder") }
-
-            HistoryView(store: appModel.scanStore)
-                .tabItem { Label("History", systemImage: "clock") }
-
-            SettingsView(diagnostics: appModel.diagnostics, store: appModel.scanStore)
-                .tabItem { Label("Settings", systemImage: "gearshape") }
-        }
+        ScannerView(
+            viewModel: appModel.scannerViewModel,
+            store: appModel.scanStore,
+            diagnostics: appModel.diagnostics
+        )
     }
 }

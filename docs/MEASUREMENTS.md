@@ -5,6 +5,7 @@ The first implementation favors reproducible geometry over unsupported anatomica
 ## Current Experimental Outputs
 
 - Mesh bounding width-to-height ratio in provider coordinate space.
+- Mesh bounding width, height, and depth range in ARKit mesh coordinate space.
 - Approximate left-right vertex balance around the mesh x-axis.
 - Stable sample count and confidence derived from scan quality.
 

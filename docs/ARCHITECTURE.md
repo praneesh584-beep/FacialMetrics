@@ -28,7 +28,9 @@ protocol FaceCaptureProvider {
 }
 ```
 
-The mock provider drives previews, simulator workflows, and unit tests. `ARKitFaceCaptureProvider` is the physical-device path and uses `ARFaceTrackingConfiguration` when available.
+The mock provider drives hidden simulator workflows and unit tests. `ARKitFaceCaptureProvider` is the physical-device path and uses `ARFaceTrackingConfiguration` when available.
+
+`FaceMeshPreview` renders accepted ARKit mesh samples locally with SceneKit. It is a visualization of captured geometry, not a remote upload, RGB face image, or validated anatomical landmark model.
 
 ## Status Boundaries
 

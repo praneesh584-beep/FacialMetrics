@@ -4,8 +4,10 @@ struct MeasurementEngine {
     func analyze(samples: [FaceFrameSample], quality: ScanQualityResult) -> MeasurementResult {
         let widths = samples.map { $0.mesh.boundingWidth }
         let heights = samples.map { $0.mesh.boundingHeight }
+        let depths = samples.map { $0.mesh.boundingDepth }
         let medianWidth = RobustStats.median(widths) ?? 0
         let medianHeight = RobustStats.median(heights) ?? 0
+        let medianDepth = RobustStats.median(depths) ?? 0
         let ratio = medianHeight > 0 ? medianWidth / medianHeight : 0
         let symmetry = symmetryBalance(samples: samples)
         let confidence: MeasurementConfidence = quality.score > 0.85 ? .high : (quality.score > 0.6 ? .medium : .low)
@@ -13,6 +15,48 @@ struct MeasurementEngine {
         return MeasurementResult(
             algorithmVersion: AppConfiguration.measurementAlgorithmVersion,
             values: [
+                MeasurementValue(
+                    id: "mesh_width",
+                    definition: MeasurementDefinition(
+                        id: "mesh_width",
+                        name: "Mesh width",
+                        formula: "median(max vertex x - min vertex x)",
+                        unit: "meters, experimental",
+                        limitations: "ARKit mesh coordinate scale must be physically checked before using as a precise face measurement.",
+                        algorithmVersion: AppConfiguration.measurementAlgorithmVersion,
+                        physicallyValidated: false
+                    ),
+                    value: medianWidth,
+                    confidence: confidence
+                ),
+                MeasurementValue(
+                    id: "mesh_height",
+                    definition: MeasurementDefinition(
+                        id: "mesh_height",
+                        name: "Mesh height",
+                        formula: "median(max vertex y - min vertex y)",
+                        unit: "meters, experimental",
+                        limitations: "Uses mesh bounds rather than validated anatomical landmarks.",
+                        algorithmVersion: AppConfiguration.measurementAlgorithmVersion,
+                        physicallyValidated: false
+                    ),
+                    value: medianHeight,
+                    confidence: confidence
+                ),
+                MeasurementValue(
+                    id: "mesh_depth",
+                    definition: MeasurementDefinition(
+                        id: "mesh_depth",
+                        name: "Mesh depth range",
+                        formula: "median(max vertex z - min vertex z)",
+                        unit: "meters, experimental",
+                        limitations: "Describes captured mesh depth range, not nose projection or any clinical measure.",
+                        algorithmVersion: AppConfiguration.measurementAlgorithmVersion,
+                        physicallyValidated: false
+                    ),
+                    value: medianDepth,
+                    confidence: confidence
+                ),
                 MeasurementValue(
                     id: "mesh_width_height_ratio",
                     definition: MeasurementDefinition(

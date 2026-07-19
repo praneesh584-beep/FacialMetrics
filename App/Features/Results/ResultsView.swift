@@ -2,9 +2,21 @@ import SwiftUI
 
 struct ResultsView: View {
     let report: AnalysisReport
+    var previewSample: FaceFrameSample? = nil
 
     var body: some View {
         List {
+            if let previewSample {
+                Section("3D Mesh") {
+                    FaceMeshPreview(sample: previewSample)
+                        .frame(height: 280)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .listRowInsets(EdgeInsets())
+                } footer: {
+                    Text("This is the captured ARKit face mesh, rendered locally on device.")
+                }
+            }
+
             Section {
                 LabeledContent("Created", value: report.createdAt.formatted(date: .abbreviated, time: .shortened))
                 LabeledContent("Samples", value: "\(report.sampleCount)")
@@ -34,17 +46,6 @@ struct ResultsView: View {
                             .foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 4)
-                }
-            }
-
-            if let scoring = report.scoring {
-                Section("Scoring Boundary") {
-                    VStack(alignment: .leading, spacing: 8) {
-                        LabeledContent(scoring.label, value: scoring.value?.formatted(.number.precision(.fractionLength(3))) ?? "Hidden")
-                        Text(scoring.explanation)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
                 }
             }
 

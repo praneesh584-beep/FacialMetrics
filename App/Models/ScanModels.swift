@@ -62,6 +62,11 @@ struct FaceMeshSnapshot: Codable, Equatable, Sendable {
         guard let minY = vertices.map(\.y).min(), let maxY = vertices.map(\.y).max() else { return 0 }
         return maxY - minY
     }
+
+    var boundingDepth: Double {
+        guard let minZ = vertices.map(\.z).min(), let maxZ = vertices.map(\.z).max() else { return 0 }
+        return maxZ - minZ
+    }
 }
 
 struct PoseSnapshot: Codable, Equatable, Sendable {
