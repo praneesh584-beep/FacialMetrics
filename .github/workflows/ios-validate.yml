@@ -50,16 +50,20 @@ jobs:
 
       - name: Build for simulator
         run: |
+          set -o pipefail
+          mkdir -p build/logs
           xcodebuild \
             -project FaceMetric.xcodeproj \
             -scheme FaceMetric \
             -configuration Debug \
             -destination "platform=iOS Simulator,name=${{ steps.simulator.outputs.name }}" \
             CODE_SIGNING_ALLOWED=NO \
-            build
+            build 2>&1 | tee build/logs/simulator-build.log
 
       - name: Run unit tests
         run: |
+          set -o pipefail
+          mkdir -p build/logs
           xcodebuild \
             -project FaceMetric.xcodeproj \
             -scheme FaceMetric \
@@ -67,7 +71,20 @@ jobs:
             -destination "platform=iOS Simulator,name=${{ steps.simulator.outputs.name }}" \
             -resultBundlePath build/TestResults.xcresult \
             CODE_SIGNING_ALLOWED=NO \
-            test
+            test 2>&1 | tee build/logs/unit-tests.log
+
+      - name: Print compiler errors
+        if: failure() && hashFiles('build/logs/*.log') != ''
+        run: |
+          grep -n -i -E "error:|fatal error:" build/logs/*.log || true
+
+      - name: Upload build logs on failure
+        if: failure() && hashFiles('build/logs/*.log') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: facemetric-build-logs
+          path: build/logs
+          retention-days: 7
 
       - name: Upload test results on failure
         if: failure() && hashFiles('build/TestResults.xcresult/**') != ''
