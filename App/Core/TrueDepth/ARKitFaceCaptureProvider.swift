@@ -101,13 +101,19 @@ final class ARKitFaceCaptureProvider: NSObject, FaceCaptureProvider, ARSessionDe
 private extension FaceFrameSample {
     init(faceAnchor: ARFaceAnchor, trackedFaceCount: Int, frameTimestamp: TimeInterval?) {
         let geometry = faceAnchor.geometry
-        let vertices = UnsafeBufferPointer(start: geometry.vertices, count: geometry.vertexCount)
-        let triangleIndices = UnsafeBufferPointer(start: geometry.triangleIndices, count: geometry.triangleCount * 3)
-        let textureCoordinates = UnsafeBufferPointer(start: geometry.textureCoordinates, count: geometry.vertexCount)
+        let vertices = geometry.vertices.map { vertex in
+            Vector3(x: Double(vertex.x), y: Double(vertex.y), z: Double(vertex.z))
+        }
+        let triangleIndices = geometry.triangleIndices.map { index in
+            Int(index)
+        }
+        let textureCoordinates = geometry.textureCoordinates.map { coordinate in
+            Vector2(x: Double(coordinate.x), y: Double(coordinate.y))
+        }
         let mesh = FaceMeshSnapshot(
-            vertices: vertices.map { Vector3(x: Double($0.x), y: Double($0.y), z: Double($0.z)) },
-            triangleIndices: triangleIndices.map { Int($0) },
-            textureCoordinates: textureCoordinates.map { Vector2(x: Double($0.x), y: Double($0.y)) }
+            vertices: vertices,
+            triangleIndices: triangleIndices,
+            textureCoordinates: textureCoordinates
         )
         let transform = Matrix4x4Snapshot(faceAnchor.transform)
         let pose = PoseSnapshot(
